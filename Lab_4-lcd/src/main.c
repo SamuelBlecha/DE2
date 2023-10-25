@@ -94,13 +94,7 @@ int main(void)
     lcd_command(1<<LCD_DDRAM);       // Set addressing back to DDRAM (Display Data RAM)
                                      // ie to character codes
 
-    // Display symbol with Character code 0
-    lcd_gotoxy(7,1);
-    lcd_putc(0x00);
-    lcd_putc(0x01);
-    lcd_putc(0x02);
-    lcd_putc(0x03);
-
+    
     // Put string(s) on LCD screen
     //lcd_gotoxy(6, 1);
     //lcd_puts("LCD Test");
@@ -109,7 +103,7 @@ int main(void)
     // Configuration of 8-bit Timer/Counter2 for Stopwatch update
     // Set the overflow prescaler to 16 ms and enable interrupt
 
-    TIM1_OVF_1SEC
+    TIM1_OVF_262MS
     TIM1_OVF_ENABLE
 
     TIM2_OVF_16MS
@@ -229,10 +223,14 @@ ISR(TIMER2_OVF_vect)
 
 ISR(TIMER1_OVF_vect)
 {
+  TCNT1 = 15508;
+  
   static uint8_t prgrsBarLgth = 0;
-  if(prgrsBarLgth > 4)
+  if(prgrsBarLgth > 29)
   {
     prgrsBarLgth = 0;
+    lcd_gotoxy(0,1);
+    lcd_puts("      ");
   }
   prgrsBarLgth++;
 
@@ -240,8 +238,30 @@ ISR(TIMER1_OVF_vect)
 
   static uint8_t i;
 
-  for (i = 0; i < prgrsBarLgth; i++) 
+  for (i = 0; i < (prgrsBarLgth / 5); i++) 
   {
     lcd_putc(0xff);
   }  
+
+  switch (prgrsBarLgth % 5)
+  {
+  case 1:
+    lcd_putc(0x00);
+    break;
+
+  case 2:
+    lcd_putc(0x01);
+    break;
+
+  case 3:
+    lcd_putc(0x02);
+    break;
+
+  case 4:
+    lcd_putc(0x03);
+    break;
+  
+  default:
+    break;
+  }
 }
